@@ -7,6 +7,7 @@ from gpiozero import LED, Button
 
 #check if Arduino ADC is connected via USB
 #if not used, program continues with only iMET recording
+"""
 try:
     ser_ADC = serial.Serial(
             port='/dev/ARD',
@@ -18,33 +19,22 @@ try:
     )
     use_ADC = 1
 except: #error if no adc attached.
-    print("No ADC attached. Not using.\n") #TODO
+    print("No ADC attached for the GPS. Not using.\n") #TODO
     use_ADC = 0
+"""
 
-      
-#ser_xBee = serial.Serial(
-#        port='/dev/ttyS0',
-#        baudrate = 9600,
-#        parity=serial.PARITY_NONE,
-#        stopbits=serial.STOPBITS_ONE,
-#        bytesize=serial.EIGHTBITS,
-#        timeout=1
-#)
-
-#check if iMet attached
+#check if GPS attached
 try:
     ser_gps = serial.Serial('/dev/gps', 4800)
 except:
         print("no GPS attached, cannot continue. \n")
         exit()
-
+use_ADC = 1
 try:
-    collect_ADC = LED(27)
-    stop_button = Button(25, pull_up=False) #TODO: was 25, changed to 13/17
+    #collect_ADC = LED(27)
+    #stop_button = Button(25, pull_up=False) #TODO: was 25, changed to 13/17
 
-    counter=0#potentially unneccessary
-
-#open iMET file
+#open GPS file
 #first get filename
     data_path = "/mnt/sda1/GPS_data/GPS"
     #location = sys.argv[1]
@@ -64,11 +54,9 @@ try:
         if use_ADC == 1:
             gps_file = open(data_file, "a+") #open new file appending
             data_gps = ser_gps.readline().decode()
-            collect_ADC.on() #tell arduino to grab data
-            collect_ADC.off()
-            data_ADC = ser_ADC.readline().decode()
-	    #data_all = data_ADC + data_iMET
-            #ser_xBee.write(data_all)
+           # collect_ADC.on() #tell arduino to grab data
+           # collect_ADC.off()
+           # data_ADC = ser_ADC.readline().decode()
             gps_file.write(data_gps)
             gps_file.write("\n")
             gps_file.close()
@@ -81,22 +69,9 @@ try:
             gps_file.write(data_gps)
             gps_file.write("\n")
             gps_file.close()
-    
-#stop_button.wait_for_press()
-#print("aye bro the button was pressed")
-    """
-    for x in range (10):
-             #iMET_file = open(data_file, "a+") #open new iMET file appending
-             data_iMET = ser_iMET.readline().decode()
-             print(data_iMET)
-             #iMET_file.write(data_iMET)
-             #iMET_file.write("\n")
-             #iMET_file.close()
-    """
-    print("done\n")
-    
+        
 except:
     print("exception thrown")
-    if not gps_file.closed:
+    if gps_file is not None and not gps_file.closed:
         print("closing file")
         gps_file.close()
